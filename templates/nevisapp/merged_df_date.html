@@ -136,7 +136,7 @@
                               <div class="col-lg-8 grid-margin stretch-card">
                                 <div class="card">
                                   <div class="card-body">
-                                    <h4 class="card-title">Predictive Aluminium Price Result</h4>
+                                    <h4 class="card-title">Trend for Predictive Aluminium Price</h4>
                                     <canvas id="randomChart" height="120"></canvas>
                                   </div>
                                 </div>
@@ -236,7 +236,8 @@
       </div>
       <script>
         const div2 = document.querySelector('.text2');
-        const text2 = "Stakeholder disarankan untuk membeli aluminium pada bulan Agustus 2024 dimana harga aluminium diprediksi turun jika dibandingkan dengan bulan-bulan sebelumnya. Selain itu, Stakeholder juga disarankan untuk selalu mengikuti perkembangan harga aluminium setiap bulannya agar dapat mengetahui kapan harga aluminium turun dan naik. Kesimpulan yang dapat diambil dari data di atas adalah harga aluminium cenderung fluktuatif, sehingga disarankan untuk membeli pada saat harga terendah dan menjual saat harga sedang naik untuk mendapatkan keuntungan yang maksimal.";
+        const text2 = "Penurunan Produksi Aluminium Produksi aluminium mengalami penurunan sebesar 8,87 ton dari tahun 2020 ke tahun 2021. Ini adalah tren yang signifikan dan dapat menjadi perhatian utama dalam industri aluminium di Indonesia. Penurunan ini bisa disebabkan oleh berbagai faktor, seperti penurunan permintaan global atau masalah internal dalam proses produksi.";
+
         function textTypingEffect(element, text, i=0) {
             element.textContent += text[i];
 
@@ -250,7 +251,7 @@
     </script>
       <script>
         const div = document.querySelector('.text');
-        const text = "Berdasarkan data yang diberikan, nilai aluminium pada tahun 2024 mengalami fluktuasi dengan kenaikan dan penurunan secara bergantian. Pola ini cukup mirip dengan pola pada data sebelumnya yang menunjukkan bahwa harga aluminium dunia masih belum stabil dan sangat dipengaruhi oleh perkembangan ekonomi global. Faktor-faktor yang mempengaruhi harga aluminium antara lain demand dan supply yang berhubungan dengan pertumbuhan industri pengguna aluminium, harga bahan baku, dan juga nilai tukar mata uang. Saat ini, kondisi harga aluminium dunia dipengaruhi oleh perang dagang antara negara-negara besar seperti Amerika Serikat dan China, yang berdampak pada penurunan permintaan dan peningkatan produksi aluminium di negara-negara tersebut";
+        const text = "Penurunan Produksi Aluminium Produksi aluminium mengalami penurunan sebesar 8,87 ton dari tahun 2020 ke tahun 2021. Ini adalah tren yang signifikan dan dapat menjadi perhatian utama dalam industri aluminium di Indonesia. Penurunan ini bisa disebabkan oleh berbagai faktor, seperti penurunan permintaan global atau masalah internal dalam proses produksi.";
 
         function textTypingEffect(element, text, i=0) {
             element.textContent += text[i];
@@ -264,71 +265,64 @@
         textTypingEffect(div, text);
     </script>
  <script>
-  // Fetch data from the endpoint
-  fetch('http://127.0.0.1:8000/nevisapp/al_pred/')
-      .then(response => response.json())
-      .then(data => {
-          // Extracting labels and data from the fetched response
-          const labels = data.data.map(item => new Date(item['date']).toLocaleString('default', { month: 'long' })); // Convert date strings to month strings
-          const predictiveData = data.data.map(item => item['aluminium_price']);
+  document.getElementById('applyFilter').addEventListener('click', function() {
+    // Get the selected start and end dates
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    // Fetch data from the endpoint
+    fetch('http://127.0.0.1:8000/nevisapp/al_pred/')
+        .then(response => response.json())
+        .then(data => {
+            // Extracting labels and data from the fetched response
+            const labels = [];
+            const predictiveData = [];
+            
+            // Filter dates and convert 'date' to ensure consistency within the selected range
+            data.data.forEach(item => {
+                const date = new Date(item['date']);
+                if (date >= new Date(startDate) && date <= new Date(endDate)) {
+                    labels.push(date.toLocaleString('default', { month: 'long' }));
+                    predictiveData.push(item['aluminium_price']);
+                }
+            });
 
-          // Update the data object with fetched data
-          const datasets = [];
-          
-          // Dataset for dates before or on 2024-01-01
-          const beforeThresholdData = {
-              label: 'Before 2024-01-01',
-              backgroundColor: 'rgb(255, 99, 132)',
-              borderColor: 'rgb(255, 99, 132)',
-              data: [],
-              fill: false,
-          };
+            // Update the data object with fetched data
+            const datasets = [];
+            
+            // Dataset for selected date range
+            const selectedDateRangeData = {
+                label: 'Selected Date Range',
+                backgroundColor: 'rgb(54, 162, 235)',
+                borderColor: 'rgb(54, 162, 235)',
+                data: predictiveData,
+                fill: false,
+            };
 
-          // Dataset for dates after 2024-01-01
-          const afterThresholdData = {
-              label: 'After 2024-01-01',
-              backgroundColor: 'rgb(54, 162, 235)',
-              borderColor: 'rgb(54, 162, 235)',
-              data: [],
-              fill: false,
-          };
+            datasets.push(selectedDateRangeData);
 
-          // Check dates and update datasets
-          const thresholdDate = new Date('2024-01-01');
-          labels.forEach((date, index) => {
-              if (new Date(data.data[index]['date']) > thresholdDate) {
-                  afterThresholdData.data.push(predictiveData[index]);
-                  beforeThresholdData.data.push(null); // For consistency in data length
-              } else {
-                  beforeThresholdData.data.push(predictiveData[index]);
-                  afterThresholdData.data.push(null); // For consistency in data length
-              }
-          });
+            // Update the configuration options
+            const config = {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets,
+                },
+                options: {
+                    responsive: true,
+                },
+            };
 
-          datasets.push(beforeThresholdData);
-          datasets.push(afterThresholdData);
-
-          // Update the configuration options
-          const config = {
-              type: 'line',
-              data: {
-                  labels: labels,
-                  datasets: datasets,
-              },
-              options: {
-                  responsive: true,
-              },
-          };
-
-          // Create a new chart instance
-          var myChart = new Chart(
-              document.getElementById('myChart'),
-              config
-          );
-      })
-      .catch(error => {
-          console.error('Error fetching data:', error);
-      });
+            // Create a new chart instance
+            var myChart = new Chart(
+                document.getElementById('myChart'),
+                config
+            );
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+});
 </script>
 
 

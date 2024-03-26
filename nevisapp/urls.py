@@ -15,6 +15,16 @@ urlpatterns=[
     path('aluminium/',views.import_and_return_json, name='aluminium'),
     path('al/',views.al_predict, name='al'),
     path('al_pred/',views.get_pred_al, name='al_pred'),
-    path('al_pred_api/',views.get_data_from_api, name='al_pred_api'),
+    path('al_pred_dl/',views.get_pred_al_dl, name='al_pred_dl'),
     path('coba/', views.coba, name='coba'),
+
+    #import data
+    path('data_aluminium/', views.import_data, name='data_aluminium'),
+
+    #predictive analysis
+    path('pred_logres/', views.pred_logres, name='pred_logres'),
+    path('pred_ranres/', views.pred_ranres, name='pred_ranres'),
+
+    path('conclusion/', views.req_conclusion, name= 'conclusion'),
+    path('recommendation/', views.get_recommendation, name= 'recommendation'),
 ]
